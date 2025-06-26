@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from actions.interactions import FindPath, Eat, Attack
+import logging
 
 
 class Entity(ABC):
@@ -102,19 +103,28 @@ class Herbivore(Creature):
     def make_move(self, simulation):
         find_path = FindPath()
         eat = Eat()
-        next_pos = find_path(simulation, self, Grass)
-        if next_pos:
-            target = simulation.map.map_rows[next_pos[0]][next_pos[1]]
-            if target and isinstance(target, Grass) and next_pos == target.location:
-                eat(simulation, self, target)
+        logging.debug(f"Herbivore at {self.location} (HP: {self.hp}, Speed: {self.speed}) searching for Grass")
+        for _ in range(self.speed):
+            next_pos = find_path(simulation, self, Grass)
+            if next_pos:
+                target = simulation.map.map_rows[next_pos[0]][next_pos[1]]
+                if target and isinstance(target, Grass) and next_pos == target.location:
+                    logging.info(f"Herbivore at {self.location} eats Grass at {next_pos}")
+                    eat(simulation, self, target)
+                    break
+                else:
+                    logging.info(f"Herbivore at {self.location} moves to {next_pos}")
+                    simulation.map.move_entity(self, *next_pos)
             else:
-                simulation.map.move_entity(self, *next_pos)
-        else:
-            directions = simulation.map.get_adjacent_positions(*self.location)
-            import random
-            random.shuffle(directions)
-            for new_y, new_x in directions:
-                if simulation.map.move_entity(self, new_y, new_x):
+                directions = simulation.map.get_adjacent_positions(*self.location)
+                import random
+                random.shuffle(directions)
+                for new_y, new_x in directions:
+                    if simulation.map.move_entity(self, (new_y, new_x)):
+                        logging.info(f"Herbivore at {self.location} moves randomly to {(new_y, new_x)}")
+                        break
+                else:
+                    logging.warning(f"Herbivore at {self.location} cannot move: no free cells")
                     break
 
 
@@ -139,19 +149,29 @@ class Predator(Creature):
         find_path = FindPath()
         attack = Attack()
         eat = Eat()
-        next_pos = find_path(simulation, self, Herbivore)
-        if next_pos:
-            target = simulation.map.map_rows[next_pos[0]][next_pos[1]]
-            if target and isinstance(target, Herbivore) and next_pos == target.location:
-                attack(simulation, self, target)
-                if target.hp <= 0:
-                    eat(simulation, self, target)
+        logging.debug(f"Predator at {self.location} (HP: {self.hp}, Speed: {self.speed}) searching for Herbivore")
+        for _ in range(self.speed):
+            next_pos = find_path(simulation, self, Herbivore)
+            if next_pos:
+                target = simulation.map.map_rows[next_pos[0]][next_pos[1]]
+                if target and isinstance(target, Herbivore) and next_pos == target.location:
+                    logging.info(f"Predator at {self.location} attacks Herbivore at {next_pos} (HP: {target.hp})")
+                    attack(simulation, self, target)
+                    if target.hp <= 0:
+                        logging.info(f"Predator at {self.location} eats Herbivore at {next_pos}")
+                        eat(simulation, self, target)
+                    break
+                else:
+                    logging.info(f"Predator at {self.location} moves to {next_pos}")
+                    simulation.map.move_entity(self, *next_pos)
             else:
-                simulation.map.move_entity(self, *next_pos)
-        else:
-            directions = simulation.map.get_adjacent_positions(*self.location)
-            import random
-            random.shuffle(directions)
-            for new_y, new_x in directions:
-                if simulation.map.move_entity(self, new_y, new_x):
+                directions = simulation.map.get_adjacent_positions(*self.location)
+                import random
+                random.shuffle(directions)
+                for new_y, new_x in directions:
+                    if simulation.map.move_entity(self, (new_y, new_x)):
+                        logging.info(f"Predator at {self.location} moves randomly to {(new_y, new_x)}")
+                        break
+                else:
+                    logging.warning(f"Predator at {self.location} cannot move: no free cells")
                     break

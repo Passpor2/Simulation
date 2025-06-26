@@ -16,16 +16,22 @@ class Map:
     def __init__(self, size: int):
         self.size = size
         self.map_rows = {key: [None for _ in range(self.size)] for key in range(size)}
-        self.entities = dict()
+        self.entities = {
+            Grass: [], 
+            Herbivore: [], 
+            Predator: [], 
+            Rock: [], 
+            Tree: []
+        }
 
     def add_entity(self, entity, location):
         y, x = location
         if 0 <= y < self.size and 0 <= x < self.size and self.map_rows[y][x] is None:
             self.map_rows[y][x] = entity
-            if self.entities.get(entity):
+            if self.entities.get(type(entity)):
                 self.entities[type(entity)].append(location)
             else:
-                self.entities[entity] = [location]
+                self.entities[type(entity)] = [location]
             return True
         return False
     
@@ -47,13 +53,13 @@ class Map:
             return True
         return False
 
-    def get_adjacent_positions(self, y, x):
-        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    def get_adjacent_positions(self, y, x, speed=1):
+        directions = [(0, speed), (0, -speed), (speed, 0), (-speed, 0)]
         next_positions = []
         for dy, dx in directions:
             new_y, new_x = y + dy, x + dx
-            if 0 <= new_y <= self.size and 0 <= new_x <= self.size:
-                if self.map_rows[new_y][new_x] is None or isinstance(self.map_rows[new_y][new_x], (Grass, Herbivore)):
+            if 0 <= new_y < self.size and 0 <= new_x < self.size:
+                if self.map_rows[new_y][new_x] is None:
                     next_positions.append((new_y, new_x))
         return next_positions
     

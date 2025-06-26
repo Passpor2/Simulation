@@ -1,9 +1,9 @@
 import time
-from entities.entities import Creature, Grass, Herbivore, Predator, Rock, Tree
 from Map.renderer import ConsoleRenderer
 from Map.map import Map
 from actions.spawn import SpawnEntity, RespawnEntity
 from actions.movement import MoveAction
+from config import BASE_ENTITIES, RESPAWN_RULES, setup_logging
 
 
 class Simulation:
@@ -30,6 +30,7 @@ class Simulation:
     '''
 
     def __init__(self, map_size):
+        setup_logging()
         self.turns_count = 0
         self.running = False
         self.map = Map(map_size)
@@ -39,16 +40,9 @@ class Simulation:
         ]
         self.turn_actions = [
             MoveAction(),
-            RespawnEntity(Grass, threshold=4, spawn_quantity=6),
-            RespawnEntity(Herbivore, threshold=3, spawn_quantity=3)
+            *[RespawnEntity(**rule) for rule in RESPAWN_RULES]
         ]
-        self.base_entities = [
-            (Grass, 10), 
-            (Rock, 5), 
-            (Tree, 5), 
-            (Herbivore, 6), 
-            (Predator, 3)
-        ]
+        self.base_entities = BASE_ENTITIES
 
     def next_turn(self):
         '''
@@ -63,6 +57,7 @@ class Simulation:
         print(f"Ход {self.turns_count}")
 
     def start_simulation(self, *args):
+        import logging
         '''
         Метод, запускающий симуляцию и начальные действия.
         В качестве аргументов передается список кортежей, 
@@ -75,6 +70,7 @@ class Simulation:
             args = self.base_entities
         for entity_type, quantity in args:
             self.init_actions[0](self, entity_type, quantity)
+        logging.info(f'Starting a new Simulation')
         while self.running:
             self.next_turn()
             time.sleep(0.5)
