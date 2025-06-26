@@ -53,8 +53,8 @@ class Map:
             return True
         return False
 
-    def get_adjacent_positions(self, y, x, speed=1):
-        directions = [(0, speed), (0, -speed), (speed, 0), (-speed, 0)]
+    def get_adjacent_positions(self, y, x):
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         next_positions = []
         for dy, dx in directions:
             new_y, new_x = y + dy, x + dx

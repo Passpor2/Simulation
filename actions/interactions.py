@@ -11,6 +11,7 @@ class FindPath(Action):
         super().__init__()
     
     def __call__(self, simulation, creature, target_type):
+        logging.info(f'{creature.__class__.__name__} started to seek a target')
         if hasattr(creature, 'target') and creature.target and creature.target in simulation.map.entities.get(target_type, []):
             logging.info('First if operator satisfied')
             target_loc = creature.target
@@ -41,10 +42,10 @@ class FindPath(Action):
         queue = deque([(creature.location, [])])
         visited = {creature.location}
         max_steps = creature.speed
-        logging.info(f'Get started to launch a while loop with {target_loc=}')
+        logging.info(f'{creature.__class__.__name__} launches a while loop with {target_loc=} (bfs find path)')
         while queue:
+            logging.debug(f'(while)\t{queue=}')
             (y, x), path = queue.popleft()
-            logging.debug(f'\t{y=}, {x=}, {path=}')
             if (y, x) == target_loc:
                 if path:
                     logging.debug(f"\tPath found to {target_type.__name__} at {target_loc}: {path}")
@@ -52,12 +53,13 @@ class FindPath(Action):
                 return None
             if len(path) >= max_steps:
                 continue
-            logging.info(f'\tGet started to launch a for loop with {target_loc=}')
-            for new_y, new_x in simulation.map.get_adjacent_positions(y, x, creature.speed):
-                logging.debug(f'\t\t{y=}, {x=}, {path=}')
+            logging.info(f'\t{creature.__class__.__name__} launches a for loop with {target_loc=}')
+            for new_y, new_x in simulation.map.get_adjacent_positions(y, x):
+                logging.debug(f'\t\t{new_y=}, {new_x=}, {path=}')
                 if (new_y, new_x) not in visited:
                     visited.add((new_y, new_x))
                     queue.append(((new_y, new_x), path + [(new_y, new_x)]))
+            logging.debug(f'{queue}')
         creature.target = None
         logging.debug(f"No path found to {target_type.__name__} at {target_loc} for {creature.__class__.__name__}")
         return None

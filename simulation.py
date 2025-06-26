@@ -1,4 +1,5 @@
 import time
+import logging
 from Map.renderer import ConsoleRenderer
 from Map.map import Map
 from actions.spawn import SpawnEntity, RespawnEntity
@@ -51,13 +52,14 @@ class Simulation:
         а также плюсует счетчик ходов.
         '''
         self.turns_count += 1
+        logging.info(f'Turn {self.turns_count}')
         for action in self.turn_actions:
+            logging.info(f'Action {action.__class__.__name__} used')
             action(self)
         self.renderer.render_map()
         print(f"Ход {self.turns_count}")
 
     def start_simulation(self, *args):
-        import logging
         '''
         Метод, запускающий симуляцию и начальные действия.
         В качестве аргументов передается список кортежей, 
@@ -73,7 +75,7 @@ class Simulation:
         logging.info(f'Starting a new Simulation')
         while self.running:
             self.next_turn()
-            time.sleep(0.5)
+            time.sleep(1)
 
     def pause_simulation(self):
         '''

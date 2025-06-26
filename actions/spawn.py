@@ -20,6 +20,7 @@ class SpawnEntity(Action):
 
     def __call__(self, simulation, entity_type, quantity):
         free_cells = [(y, x) for x in range(simulation.map.size) for y in range(simulation.map.size) if simulation.map.map_rows[y][x] is None]
+        logging.info(f'Spawn entities. {free_cells=}')
         if len(free_cells) < quantity:
             logging.warning(f"Requested {quantity} {entity_type.__name__}, but only {len(free_cells)} free cells available")
             quantity = len(free_cells)
