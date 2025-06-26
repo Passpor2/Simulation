@@ -52,10 +52,12 @@ class FindPath(Action):
                     return path[0]
                 return None
             if len(path) >= max_steps:
+                logging.warning(f'Max steps')
                 continue
             logging.info(f'\t{creature.__class__.__name__} launches a for loop with {target_loc=}')
             for new_y, new_x in simulation.map.get_adjacent_positions(y, x):
-                logging.debug(f'\t\t{new_y=}, {new_x=}, {path=}')
+                logging.debug(f'\t\t(for){new_y=}, {new_x=}, {path=}' \
+                              f'\n\t\t{queue=}')
                 if (new_y, new_x) not in visited:
                     visited.add((new_y, new_x))
                     queue.append(((new_y, new_x), path + [(new_y, new_x)]))
